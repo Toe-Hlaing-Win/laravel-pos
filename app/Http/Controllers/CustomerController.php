@@ -17,6 +17,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        // @Error5
+
         if (request()->wantsJson()) {
             return response(
                 Customer::all()
@@ -104,13 +106,13 @@ class CustomerController extends Controller
 
         if ($request->hasFile('avatar')) {
             // Delete old avatar
-            if ($customer->avatar) {
-                Storage::delete($customer->avatar);
-            }
+            // if ($customer->avatar) {
+            //     Storage::delete($customer->avatar);
+            // }
             // Store avatar
-            $avatar_path = $request->file('avatar')->store('customers', 'public');
+            // $avatar_path = $request->file('avatar')->store('customers', 'public');
             // Save to Database
-            $customer->avatar = $avatar_path;
+            // $customer->avatar = $avatar_path;
         }
 
         if (!$customer->save()) {
@@ -121,14 +123,16 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
+        // @Error3, should check sql query run result
+        dd('Log Here ........');
         if ($customer->avatar) {
             Storage::delete($customer->avatar);
         }
 
         $customer->delete();
 
-       return response()->json([
-           'success' => true
-       ]);
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

@@ -2,26 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\OrderStoreRequest;
+use Carbon\Carbon;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Http\Requests\OrderStoreRequest;
 
 class OrderController extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $orders = new Order();
-        if($request->start_date) {
+
+        $orders = $orders->where('user_id', $request->user()->id);
+
+        if ($request->start_date) {
             $orders = $orders->where('created_at', '>=', $request->start_date);
         }
-        if($request->end_date) {
-            $orders = $orders->where('created_at', '<=', $request->end_date . ' 23:59:59');
+        if ($request->end_date) {
+            // $orders = $orders->where('created_at', '<=', $request->end_date . ' 23:59:59');
+            $orders = $orders->where('created_at', '<=', Carbon::now()->format('Y-m-d H:i:s')); // @Error1
         }
         $orders = $orders->with(['items', 'payments', 'customer'])->latest()->paginate(10);
 
-        $total = $orders->map(function($i) {
+        $total = $orders->map(function ($i) {
             return $i->total();
         })->sum();
-        $receivedAmount = $orders->map(function($i) {
+        $receivedAmount = $orders->map(function ($i) {
             return $i->receivedAmount();
         })->sum();
 

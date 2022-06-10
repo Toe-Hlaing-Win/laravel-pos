@@ -23,21 +23,23 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['items', 'payments'])->get();
+        // @Error 6, See $total Income count, income today
+        // Order List Page တွင် User နှင် သက်ဆိုင်သော Order များသာ ပြထားသညါ
+        $orders = Order::where('user_id', $request->user()->id)->with(['items', 'payments'])->get();
         $customers_count = Customer::count();
 
         return view('home', [
             'orders_count' => $orders->count(),
-            'income' => $orders->map(function($i) {
-                if($i->receivedAmount() > $i->total()) {
+            'income' => $orders->map(function ($i) {
+                if ($i->receivedAmount() > $i->total()) {
                     return $i->total();
                 }
                 return $i->receivedAmount();
             })->sum(),
-            'income_today' => $orders->where('created_at', '>=', date('Y-m-d').' 00:00:00')->map(function($i) {
-                if($i->receivedAmount() > $i->total()) {
+            'income_today' => $orders->where('created_at', '>=', date('Y-m-d') . ' 00:00:00')->map(function ($i) {
+                if ($i->receivedAmount() > $i->total()) {
                     return $i->total();
                 }
                 return $i->receivedAmount();
